@@ -1,3 +1,4 @@
+import 'package:dissau_automatic/src/pages/profile/account_page.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -24,7 +25,7 @@ class ProfilePage extends StatelessWidget {
               Container(
                 color: Color.fromARGB(
                     235, 11, 11, 28), // Color de fondo (extremos),
-                padding: EdgeInsets.only(top: 20, left: 40, right: 10),
+                padding: EdgeInsets.only(top: 20, left: 50, right: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -51,7 +52,13 @@ class ProfilePage extends StatelessWidget {
                           _SettingsTile(
                             title: 'Mi Cuenta',
                             subtitle: 'Contraseña, suscripción, etc',
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => AccountPage()),
+                              );
+                            },
                           ),
                           _SettingsTile(
                             title: 'Recomendar a un amigo',
@@ -100,7 +107,7 @@ class _SettingsTile extends StatelessWidget {
                 title,
                 style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 15,
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w600),
               ),
@@ -108,12 +115,15 @@ class _SettingsTile extends StatelessWidget {
                 subtitle,
                 style: const TextStyle(
                     color: Colors.white70,
-                    fontSize: 14,
+                    fontSize: 13,
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w100),
               ),
-              trailing:
-                  const Icon(Icons.arrow_forward_ios, color: Colors.white),
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ],
         ));

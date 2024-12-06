@@ -8,6 +8,6 @@ Map<String, WidgetBuilder> getRutas() {
   return <String, WidgetBuilder>{
     "login": (BuildContext context) => LoginPage(),
     "register": (BuildContext context) => const RegisterPage(),
-    "sms": (BuildContext context) => AppNavigation(),
+    "home": (BuildContext context) => AppNavigation(),
   };
 }

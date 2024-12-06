@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'src/bloc/provider.dart';
 import 'src/pages/main/home_page.dart';
 import 'src/routes/routes.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +16,8 @@ Future<void> main() async {
   if (kReleaseMode) {
     debugPrint = (String? message, {int? wrapWidth}) {};
   }
-
+  Stripe.publishableKey =
+      'pk_test_51P4caFDrtegwEnl3baIqBDl1Id2beUGIBBUQOK2UfhThO0buETVWO3RDt5WZgc00Vk4qQa7HgFIENycYkCWuw4Jq00sw8wPXAX';
   await initializeService();
 
   runApp(MyApp());
@@ -33,11 +35,11 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           fontFamily: 'Poppins', // Usar la fuente declarada
         ),
-        initialRoute: user.token.isEmpty ? "login" : "sms",
+        initialRoute: user.token.isEmpty ? "login" : "home",
         routes: getRutas(),
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute(
-              builder: (BuildContext context) => HomePage());
+              builder: (BuildContext context) => const HomePage());
         },
       ),
     );

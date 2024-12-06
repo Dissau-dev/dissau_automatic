@@ -97,7 +97,7 @@ class _ChatFormState extends State<ChatForm> {
                       "chat name",
                       "Chat name",
                       bloc.chatNameStream,
-                      Icons.chat_bubble_outline),
+                      Icon(Icons.chat_bubble_outline)),
                   SizedBox(height: 16),
                   chatFormField(
                       bloc,
@@ -106,7 +106,7 @@ class _ChatFormState extends State<ChatForm> {
                       "e: -111111111",
                       "Chat id",
                       bloc.chatIdStream,
-                      Icons.telegram_outlined),
+                      Icon(Icons.telegram_outlined)),
                   SizedBox(height: 16),
                   chatFormField(
                       bloc,
@@ -115,7 +115,7 @@ class _ChatFormState extends State<ChatForm> {
                       "e: 6664921519:AAESkD025zmDyB9Z8fh87n1sSRDYyX1pmGo",
                       "Bot token",
                       bloc.chatIdStream,
-                      Icons.code),
+                      Icon(Icons.code)),
                   SizedBox(height: 16),
                   // _BtnSave(bloc)
                 ],

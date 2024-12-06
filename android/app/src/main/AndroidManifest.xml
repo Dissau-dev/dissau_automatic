@@ -15,7 +15,7 @@
   -->
  
     <application
-        android:label="dissau_automatic"
+        android:label="Jumb 2 Bot"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

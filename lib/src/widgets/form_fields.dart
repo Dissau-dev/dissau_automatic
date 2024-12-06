@@ -8,44 +8,46 @@ Widget chatFormField(
     String hintText,
     String labelText,
     Stream<String>? stream,
-    IconData icon) {
+    Widget? icon) {
   return StreamBuilder(
       stream: stream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         return Container(
           padding: EdgeInsets.symmetric(horizontal: 2.0),
           child: TextFormField(
-            style: TextStyle(
+            cursorColor: Color(0xFF1D88E6),
+            cursorWidth: 1.0,
+            style: const TextStyle(
                 color: Colors.white, fontFamily: 'Poppins', fontSize: 14),
             keyboardType: TextInputType.name,
             initialValue: initialValue,
             decoration: InputDecoration(
               contentPadding:
-                  EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
               prefixIcon: Padding(
                 // Cambiado a prefixIcon
                 padding: const EdgeInsets.only(right: 8.0), // Espaciado
-                child: Icon(icon, color: Colors.white),
+                child: icon,
               ),
               errorText: snapshot.hasError ? snapshot.error.toString() : null,
               labelText: labelText,
               labelStyle: TextStyle(color: Colors.white),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
-                borderSide:
-                    BorderSide(color: Color(0xFF1D88E6)), // Color del contorno
+                borderSide: BorderSide(
+                    color: Color(0xFF1D88E6), width: 1), // Color del contorno
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(
                     15), // Asegúrate de mantener el borderRadius aquí
-                borderSide:
-                    BorderSide(color: Color(0xFF1D88E6)), // Color al enfocar
+                borderSide: BorderSide(
+                    color: Color(0xFF1D88E6), width: 2.0), // Color al enfocar
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(
                     15), // Asegúrate de mantener el borderRadius aquí
-                borderSide:
-                    BorderSide(color: Color(0xFF1D88E6)), // Color habilitado
+                borderSide: BorderSide(
+                    color: Color(0xFF1D88E6), width: 1), // Color habilitado
               ),
             ),
             onChanged: onChanged,

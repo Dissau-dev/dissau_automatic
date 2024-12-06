@@ -29,6 +29,7 @@ dependencies:
   flutter_foreground_service: ^0.4.1
   flutter_background_service:
   flutter_local_notifications: ^17.2.4
+  flutter_stripe: ^10.2.0
 
 dev_dependencies:
   flutter_test:
@@ -40,7 +41,9 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/
+    - assets/images/Baner.png
+    - assets/images/icon_bot.png
+    - assets/images/Bedge.png
 
   fonts:
     - family: Poppins

@@ -63,6 +63,6 @@ class PreferenciasUsuario {
   String get token => _prefs?.getString(_keyToken) ?? '';
 
   set token(String value) {
-    _prefs?.setString(_keyChatName, value);
+    _prefs?.setString(_keyToken, value);
   }
 }

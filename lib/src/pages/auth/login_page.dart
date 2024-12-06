@@ -4,6 +4,8 @@ import 'package:dissau_automatic/src/bloc/provider.dart';
 import 'package:dissau_automatic/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 
+import '../../widgets/app_bart.dart';
+
 class LoginPage extends StatefulWidget {
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -15,115 +17,118 @@ class _LoginPageState extends State<LoginPage> {
   final userProvider = new UserProvider();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: <Widget>[
-          _createBack(context),
-          _loginForm(context),
-        ],
-      ),
-    );
+    return Scaffold(body: _placeholder());
   }
 
-  Widget _createBack(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final backPurple = Container(
-      height: size.height * 0.4,
-      width: double.infinity,
-      decoration: BoxDecoration(
-          gradient: LinearGradient(colors: <Color>[
-        Color.fromRGBO(63, 63, 153, 1.0),
-        Color.fromRGBO(90, 70, 178, 1.0)
-      ])),
-    );
-
-    final circle = Container(
-      width: 100.0,
-      height: 100.0,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(100.0),
-          color: Color.fromRGBO(255, 255, 255, 0.05)),
-    );
-
-    final titleApp = Container(
-      padding: EdgeInsets.only(top: 90.0),
-      child: Column(
-        children: [
-          Icon(
-            Icons.person_pin_circle,
-            color: Colors.white,
-            size: 100.0,
+  Widget _placeholder() {
+    return Stack(
+      children: [
+        // Imagen de fondo con degradado
+        Container(
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              colors: [
+                Color(0xFF372781), // Color principal (centro)
+                Color(0xFF25253A), // Color de fondo (extremos)
+              ],
+              radius: 0.6, // Ajusta el radio para el efecto deseado
+              center: Alignment
+                  .topRight, // Centrado hacia la esquina superior derecha
+              stops: [0.3, 1.0], // Controla la transición entre colores
+            ),
           ),
-          SizedBox(
-            height: 10.0,
-            width: double.infinity,
+        ),
+        SafeArea(
+          child: SingleChildScrollView(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start, // Alinear el texto a la izquierda
+                children: [
+                  const SizedBox(height: 50),
+                  Container(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      child: // Espacio superior
+                          const Text(
+                        "Sign In",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 36,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w700),
+                      )),
+                  const SizedBox(height: 10),
+                  Container(
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      child: // Espaciado entre los textos
+                          const Text(
+                        "Complete your data for enter to the app",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                            color: Color.fromARGB(255, 226, 226, 245),
+                            fontSize: 18,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w200),
+                      )),
+                  const SizedBox(height: 50), // Espaciado antes del formulario
+                  Align(
+                    alignment: Alignment
+                        .center, // Centrar el formulario horizontalmente
+                    child: _loginForm(context),
+                  ),
+                ],
+              ),
+            ),
           ),
-          Text(
-            "Dissau Automatic",
-            style: TextStyle(color: Colors.white, fontSize: 30),
-          )
-        ],
-      ),
+        ),
+      ],
     );
-
-    return Stack(children: <Widget>[
-      backPurple,
-      Positioned(top: 90, left: 30, child: circle),
-      Positioned(top: -40, right: -30, child: circle),
-      Positioned(bottom: -50, right: -10, child: circle),
-      Positioned(bottom: 120, right: 20, child: circle),
-      Positioned(bottom: -50, left: -20, child: circle),
-      titleApp
-    ]);
   }
 
   Widget _loginForm(BuildContext context) {
-    final bloc = Provider.of(context);
     final size = MediaQuery.of(context).size;
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          SafeArea(
-              child: Container(
-            height: 200.0,
-          )),
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 50.0),
-            width: size.width * 0.8,
-            margin: EdgeInsets.symmetric(vertical: 30.0),
-            // height: size.height * 0.4
-            decoration: BoxDecoration(boxShadow: [
-              BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 3.0,
-                  offset: Offset(0.0, 3.0))
-            ], color: Colors.white, borderRadius: BorderRadius.circular(5.0)),
-            child: Column(
-              children: [
-                Text(
-                  "Sign in",
-                  style: TextStyle(fontSize: 20.0),
-                ),
-                _sizeBox(40.0),
-                _emailField(bloc),
-                _sizeBox(20.0),
-                _passwordField(bloc),
-                _sizeBox(20.0),
-                _Btn(bloc)
-              ],
-            ),
+    final bloc = Provider.of(context);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 30.0),
+          width: size.width * 0.8,
+          child: Column(
+            children: [
+              _sizeBox(40.0),
+              _emailField(bloc),
+              _sizeBox(20.0),
+              _passwordField(bloc),
+              _sizeBox(20.0),
+              _Btn(bloc),
+            ],
           ),
-          TextButton(
+        ),
+        TextButton(
             onPressed: () =>
                 Navigator.pushReplacementNamed(context, 'register'),
-            child: Text(
-              "Do not have an account ?",
-              style: TextStyle(color: Colors.deepPurple),
-            ),
-          ),
-          _sizeBox(100.0)
-        ],
-      ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  "Do not register? ",
+                  style: TextStyle(
+                      color: Color.fromARGB(210, 251, 251, 251),
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w200),
+                ),
+                const Text(" Sign Up",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w700)),
+              ],
+            )),
+        _sizeBox(50.0),
+      ],
     );
   }
 
@@ -137,22 +142,36 @@ class _LoginPageState extends State<LoginPage> {
     return StreamBuilder(
         stream: bloc.emailStream,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
-          return Container(
-            padding: EdgeInsets.symmetric(horizontal: 20.0),
-            child: TextField(
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                  icon: Icon(
-                    Icons.alternate_email,
-                    color: Colors.deepPurple,
-                  ),
-                  hintText: ("example@gmail.com"),
-                  errorText:
-                      snapshot.hasError ? snapshot.error.toString() : null,
-                  labelText: "email"),
-              // counterText : snapshot.data,
-              onChanged: bloc.changeEmail,
+          return TextFormField(
+            cursorColor: Colors.white,
+            cursorWidth: 1.0,
+            style: TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Color(0xFF2E2D4D),
+              hintText: "email@example.com",
+              hintStyle: TextStyle(color: Colors.white54),
+              prefixIcon: Icon(Icons.email, color: Colors.white),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(
+                    color: Colors.white, width: 0.1), // Color del contorno
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(
+                    15), // Asegúrate de mantener el borderRadius aquí
+                borderSide: BorderSide(
+                    color: Colors.white, width: 0.3), // Color al enfocar
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(
+                    15), // Asegúrate de mantener el borderRadius aquí
+                borderSide: BorderSide(
+                    color: Colors.white, width: 0.1), // Color habilitado
+              ),
+              errorText: snapshot.hasError ? snapshot.error.toString() : null,
             ),
+            onChanged: bloc.changeEmail,
           );
         });
   }
@@ -161,25 +180,48 @@ class _LoginPageState extends State<LoginPage> {
     return StreamBuilder(
         stream: bloc.passwordStream,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
-          return Container(
-            padding: EdgeInsets.symmetric(horizontal: 20.0),
-            child: TextField(
-              obscureText: !viewPassword,
-              onChanged: bloc.changePasssword,
-              decoration: InputDecoration(
-                  icon: Icon(
-                    Icons.lock_clock_outlined,
-                    color: Colors.deepPurple,
-                  ),
-                  suffix: IconButton(
-                      onPressed: _viewPassword,
-                      icon: viewPassword
-                          ? Icon(Icons.visibility_off)
-                          : Icon(Icons.visibility)),
-                  errorText:
-                      snapshot.hasError ? snapshot.error.toString() : null,
-                  labelText: "password"),
+          return TextFormField(
+            cursorColor: Colors.white,
+            cursorWidth: 1.0,
+            style: TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Color(0xFF2E2D4D),
+              hintText: "password",
+              hintStyle: TextStyle(color: Colors.white54),
+              prefixIcon: Icon(Icons.lock_clock_outlined, color: Colors.white),
+              suffixIcon: IconButton(
+                  onPressed: _viewPassword,
+                  icon: viewPassword
+                      ? Icon(
+                          Icons.visibility_off,
+                          color: Colors.white,
+                        )
+                      : Icon(
+                          Icons.visibility,
+                          color: Colors.white,
+                        )),
+              errorText: snapshot.hasError ? snapshot.error.toString() : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(
+                    color: Colors.white, width: 0.1), // Color del contorno
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(
+                    15), // Asegúrate de mantener el borderRadius aquí
+                borderSide: BorderSide(
+                    color: Colors.white, width: 0.3), // Color al enfocar
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(
+                    15), // Asegúrate de mantener el borderRadius aquí
+                borderSide: BorderSide(
+                    color: Colors.white, width: 0.1), // Color habilitado
+              ),
             ),
+            obscureText: !viewPassword,
+            onChanged: bloc.changePasssword,
           );
         });
   }
@@ -188,19 +230,31 @@ class _LoginPageState extends State<LoginPage> {
     return StreamBuilder(
         stream: bloc.formValidStream,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
-          return TextButton(
-              onPressed: snapshot.hasData || !isLoading
-                  ? () => _login(bloc, context)
-                  : null, // El botón estará deshabilitado si no hay datos,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 80.0, vertical: 10.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5.0),
-                  color: isLoading ? Colors.grey : Colors.deepPurple,
-                ),
+          return Container(
+              margin: EdgeInsets.only(top: 50),
+              width: 320.0,
+              height: 52.0,
+              decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                        color: Color(0xFF372781),
+                        blurRadius: 20.0,
+                        offset: Offset(0.0, 8.0))
+                  ],
+                  borderRadius: BorderRadius.circular(50.0),
+                  color: Color(0xFF1D88E6)),
+              child: TextButton(
+                onPressed: snapshot.hasData || !isLoading
+                    ? () => _login(bloc, context)
+                    : null, // El botón estará deshabilitado si no hay datos,
+
                 child: Text(
                   isLoading ? 'Loading...' : 'Sign in',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Poppins',
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold),
                 ),
               ));
         });
@@ -218,7 +272,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     if (info['ok']) {
-      Navigator.pushReplacementNamed(context, 'sms');
+      Navigator.pushReplacementNamed(context, 'home');
     } else {
       showAlert(context, info["message"]);
     }

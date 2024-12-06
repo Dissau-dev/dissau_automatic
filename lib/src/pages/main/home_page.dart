@@ -10,6 +10,7 @@ import 'package:dissau_automatic/src/widgets/baner.dart';
 import 'package:dissau_automatic/src/widgets/btn.dart';
 import 'package:dissau_automatic/src/widgets/form_fields.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -140,8 +141,8 @@ void onStart(ServiceInstance service) async {
       );
 
       service.setForegroundNotificationInfo(
-        title: "My App Service",
-        content: "Dissau sms service",
+        title: "Dissau sms service",
+        content: "Service is alive",
       );
     } else {
       timer.cancel();
@@ -297,8 +298,7 @@ class _SmsPageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-          appBar: CustomAppBar(), body: SafeArea(child: _placeholder())),
+      home: Scaffold(body: _placeholder()),
     );
   }
 
@@ -322,12 +322,14 @@ class _SmsPageState extends State<HomePage> {
         ),
         SingleChildScrollView(
             child: Column(
-          mainAxisAlignment:
-              MainAxisAlignment.spaceBetween, // Centra verticalmente al fina
           children: [
-            const Baner(),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.08),
+            Image.asset('assets/images/Baner.png',
+                height: MediaQuery.of(context).size.height * 0.27,
+                width: MediaQuery.of(context).size.width * 2.0),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.03),
             if (!isEditing)
-              SizedBox(height: MediaQuery.of(context).size.height * 0.32),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.33),
             Align(
               alignment: Alignment.bottomCenter,
               child: _chatForm(bloc), // Siempre al final de la pantalla
@@ -352,9 +354,9 @@ class _SmsPageState extends State<HomePage> {
                 topRight: Radius.circular(24.0),
               ),
               border: const Border(
-                top: BorderSide(color: Color(0xff56567f), width: 1.5),
-                left: BorderSide(color: Color(0xff56567f), width: 1.5),
-                right: BorderSide(color: Color(0xff56567f), width: 1.5),
+                top: BorderSide(color: Color(0xff56567f), width: 2.5),
+                left: BorderSide(color: Color(0xff56567f), width: 2.5),
+                right: BorderSide(color: Color(0xff56567f), width: 2.5),
               ),
               boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
             ),
@@ -375,12 +377,14 @@ class _SmsPageState extends State<HomePage> {
                     ),
                     Expanded(
                         child: Text(
-                      "${_pref.chatName}",
+                      _pref.chatName.isEmpty
+                          ? "Default group"
+                          : "${_pref.chatName}",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           fontFamily: 'Poppins',
-                          fontWeight: FontWeight.bold,
-                          fontSize: isEditing ? 14 : 16,
+                          fontWeight: FontWeight.w600,
+                          fontSize: isEditing ? 16 : 18,
                           color: isEditing ? Colors.white : Colors.black),
                     )),
                     Row(
@@ -399,11 +403,9 @@ class _SmsPageState extends State<HomePage> {
                                   size: 28.0,
                                 ),
                           onPressed: () {
-                            _pref.chatName.isEmpty
-                                ? null
-                                : setState(() {
-                                    isEditing = !isEditing;
-                                  });
+                            setState(() {
+                              isEditing = !isEditing;
+                            });
                           },
                         ),
                       ],
@@ -411,7 +413,7 @@ class _SmsPageState extends State<HomePage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                if (isEditing || _pref.chatName.isEmpty) ...[
+                if (isEditing) ...[
                   SizedBox(height: 16),
                   chatFormField(
                       bloc,
@@ -420,7 +422,10 @@ class _SmsPageState extends State<HomePage> {
                       "Chat name",
                       "Chat name",
                       bloc.chatNameStream,
-                      Icons.chat_bubble_outline),
+                      Icon(
+                        Icons.chat_bubble_outline_rounded,
+                        color: Colors.white,
+                      )),
                   SizedBox(height: 16),
                   chatFormField(
                       bloc,
@@ -429,7 +434,10 @@ class _SmsPageState extends State<HomePage> {
                       "e: -111111111",
                       "Chat Id",
                       bloc.chatIdStream,
-                      Icons.telegram_outlined),
+                      Icon(
+                        Icons.auto_awesome_mosaic,
+                        color: Colors.white,
+                      )),
                   SizedBox(height: 16),
                   chatFormField(
                       bloc,
@@ -438,7 +446,13 @@ class _SmsPageState extends State<HomePage> {
                       ("e: 6664921519:AAESkD025zmDyB9Z8fh87n1sSRDYyX1pmGo"),
                       "Bot token",
                       bloc.botTokenStream,
-                      Icons.code_outlined),
+                      Container(
+                          padding: EdgeInsets.all(10.0),
+                          child: Image.asset(
+                            'assets/images/icon_bot.png',
+                            height: 0.0,
+                            width: 0.0,
+                          ))),
                   SizedBox(height: 16),
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -454,7 +468,7 @@ class _SmsPageState extends State<HomePage> {
                 ],
                 _btnConect(bloc),
                 const SizedBox(
-                  height: 4.0,
+                  height: 10.0,
                 )
               ],
             ),
@@ -521,7 +535,7 @@ class _SmsPageState extends State<HomePage> {
 
   Widget _btnConect(LoginBloc bloc) {
     return Container(
-      width: isEditing ? 300.0 : 320.0,
+      width: isEditing ? 300.0 : 330.0,
       height: 42.0,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12.0),
