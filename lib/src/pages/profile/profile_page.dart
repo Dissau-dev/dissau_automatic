@@ -2,6 +2,8 @@ import 'package:dissau_automatic/src/pages/profile/account_page.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,11 +55,7 @@ class ProfilePage extends StatelessWidget {
                             title: 'Mi Cuenta',
                             subtitle: 'Contraseña, suscripción, etc',
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => AccountPage()),
-                              );
+                              Navigator.pushNamed(context, '/profile/account');
                             },
                           ),
                           _SettingsTile(

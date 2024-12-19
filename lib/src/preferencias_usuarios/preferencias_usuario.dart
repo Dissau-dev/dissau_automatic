@@ -1,4 +1,9 @@
+import 'dart:convert';
+
+import 'package:dissau_automatic/providers/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../providers/subscription_model.dart';
 
 class PreferenciasUsuario {
   static final PreferenciasUsuario _instancia = PreferenciasUsuario._internal();
@@ -21,6 +26,7 @@ class PreferenciasUsuario {
   final String _keyBotToken = 'botToken';
   final String _keyChatName = 'chatName';
   final String _keyToken = "token";
+  static const String _subscriptionKey = 'subscription';
 
   // Estado de conexión
   bool get isConnected => _prefs?.getBool(_keyIsConnected) ?? false;
@@ -64,5 +70,59 @@ class PreferenciasUsuario {
 
   set token(String value) {
     _prefs?.setString(_keyToken, value);
+  }
+
+  // Guardar usuario como JSON
+  Future<void> saveUser(Map<String, dynamic> user) async {
+    await _prefs!.setString('user', json.encode(user));
+  }
+
+  // Obtener usuario (devuelve UsuarioModel)
+  UserModel? get user {
+    final userString = _prefs?.getString('user');
+    if (userString != null) {
+      final Map<String, dynamic> userJson = json.decode(userString);
+      return UserModel.fromJson(userJson);
+    }
+    return null;
+  }
+
+  Future<void> removeUser() async {
+    final prefs = await _prefs;
+    await prefs?.remove('user');
+  }
+
+  //--------------
+  // Guardar suscripción
+  // Guardar usuario como JSON
+  Future<void> saveSubscription(Map<String, dynamic> subscription) async {
+    await _prefs!.setString('subscription', json.encode(subscription));
+  }
+
+  // Obtener usuario (devuelve UsuarioModel)
+  SubscriptionModel? get subscription {
+    final subscriptionString = _prefs?.getString('subscription');
+    if (subscriptionString != null) {
+      final Map<String, dynamic> subscriptionJson =
+          json.decode(subscriptionString);
+      return SubscriptionModel.fromJson(subscriptionJson);
+    }
+    return null;
+  }
+
+  //  Guardar una nueva suscripción
+  Future<void> updateSubscriptionInStorage(
+      SubscriptionModel subscription) async {
+    print("_______execute update ${subscription}");
+
+    final subscriptionJson = json.encode(subscription.toJson());
+    await _prefs?.setString('subscription', subscriptionJson);
+  }
+
+// Eliminar la suscripción actual
+  Future<void> removeSubscriptionFromStorage() async {
+    print("_______execute remoive ${subscription}");
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('subscription');
   }
 }

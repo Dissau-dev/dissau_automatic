@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
+import 'package:dissau_automatic/providers/subscription_model.dart';
 import 'package:dissau_automatic/src/bloc/login_bloc.dart';
 import 'package:dissau_automatic/src/bloc/provider.dart';
 import 'package:dissau_automatic/src/preferencias_usuarios/preferencias_usuario.dart';
@@ -246,11 +247,14 @@ class _SmsPageState extends State<HomePage> {
   String botToken = "";
   // final String chatId = '-4179106964'; // Asegúrate de que este ID sea correcto
   final _pref = new PreferenciasUsuario();
+  final usuario = PreferenciasUsuario().user;
+  final subscriptionCache = PreferenciasUsuario().subscription;
   String smsToSend = "";
   // Inicializado desde preferencias
   bool isEditing = false;
   bool isSaving = false;
   bool isConnected = false;
+  bool isFetching = false; // Variable para controlar el estado de la solicitud
 
   @override
   void initState() {
@@ -295,6 +299,97 @@ class _SmsPageState extends State<HomePage> {
     }
   }
 
+// Función para verificar la suscripción
+  Future<bool> verificarSuscripcion() async {
+    final url =
+        'https://jumb2bot-backend.onrender.com/subscription/byUser/${usuario!.id.toString()}';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final subscription = data['subscription'];
+        final newSubscription = SubscriptionModel.fromJson(subscription);
+        await _pref.updateSubscriptionInStorage(newSubscription);
+
+        final status = subscription['status'];
+        final endDate = DateTime.parse(subscription['endDate']);
+
+        if (status == 'active' || status == 'cancel_at_period_end') {
+          if (endDate.isBefore(DateTime.now())) {
+            Fluttertoast.showToast(
+              msg: "La suscripción ha vencido. Por favor, adquiera una nueva.",
+              toastLength: Toast.LENGTH_LONG,
+              gravity: ToastGravity.TOP,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Colors.red,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+            return false;
+          } else {
+            return true; // Suscripción válida
+          }
+        } else {
+          Fluttertoast.showToast(
+            msg: "Por favor, verifique que su plan esté completo.",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.TOP,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+          return false;
+        }
+      } else if (response.statusCode == 404) {
+        await _pref.removeSubscriptionFromStorage();
+        Fluttertoast.showToast(
+          msg: "No se encontró la suscripción. Por favor, adquiera un plan.",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.TOP,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+
+        // Verificar periodo de prueba
+        final userCreatedAt = DateTime.parse(usuario!.createdAt);
+        final diferenciaDias = DateTime.now().difference(userCreatedAt).inDays;
+        if (diferenciaDias >= 3) {
+          Fluttertoast.showToast(
+            msg:
+                "El tiempo de prueba ha culminado. Por favor, adquiera un plan.",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.TOP,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+          return false;
+        } else {
+          return true; // En periodo de prueba
+        }
+      } else {
+        throw Exception(
+            "Error al verificar la suscripción: ${response.statusCode}");
+      }
+    } catch (error) {
+      print("--- ___- error $error");
+      Fluttertoast.showToast(
+        msg: "Ocurrió un error al verificar la suscripción.",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.TOP,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -304,6 +399,7 @@ class _SmsPageState extends State<HomePage> {
 
   Widget _placeholder() {
     final bloc = Provider.of(context);
+
     return Stack(
       children: [
         // Imagen de fondo
@@ -320,13 +416,50 @@ class _SmsPageState extends State<HomePage> {
             ),
           ),
         ),
-        SingleChildScrollView(
-            child: Column(
+        // IconButton para cerrar sesión
+        Positioned(
+          top: MediaQuery.of(context).padding.top +
+              10, // Ajusta posición superior
+          right: 16.0, // Ajusta posición a la derecha
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Cerrar sesión',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 8.0), // Espacio entre el texto y el icono
+              IconButton(
+                icon: const Icon(Icons.logout, color: Colors.white, size: 28.0),
+                onPressed: () async {
+                  // Lógica para cerrar sesión
+                  final prefs = PreferenciasUsuario();
+                  prefs.token = "";
+                  await prefs.removeUser();
+
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    '/login',
+                    (route) => false,
+                  );
+                },
+                tooltip: 'Cerrar sesión',
+              ),
+            ],
+          ),
+        ),
+        // Contenido principal
+        Column(
           children: [
-            SizedBox(height: MediaQuery.of(context).size.height * 0.08),
-            Image.asset('assets/images/Baner.png',
-                height: MediaQuery.of(context).size.height * 0.27,
-                width: MediaQuery.of(context).size.width * 2.0),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.14),
+            Image.asset(
+              'assets/images/Baner.png',
+              height: MediaQuery.of(context).size.height * 0.172,
+              width: MediaQuery.of(context).size.width * 2.0,
+            ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.03),
             if (!isEditing)
               SizedBox(height: MediaQuery.of(context).size.height * 0.33),
@@ -335,7 +468,7 @@ class _SmsPageState extends State<HomePage> {
               child: _chatForm(bloc), // Siempre al final de la pantalla
             ),
           ],
-        )),
+        ),
       ],
     );
   }
@@ -533,6 +666,7 @@ class _SmsPageState extends State<HomePage> {
         });
   }
 
+  // Botón con lógica de conexión
   Widget _btnConect(LoginBloc bloc) {
     return Container(
       width: isEditing ? 300.0 : 330.0,
@@ -548,41 +682,64 @@ class _SmsPageState extends State<HomePage> {
             : Color.fromARGB(5, 255, 255, 255),
       ),
       child: TextButton(
-        onPressed: () async {
-          final service = FlutterBackgroundService();
+        onPressed: isFetching
+            ? null // Desactiva el botón mientras isFetching es true
+            : () async {
+                setState(() {
+                  isFetching = true; // Activa el estado de carga
+                });
 
-          if (_pref.chatName.isEmpty) {
-            Fluttertoast.showToast(
-              msg: "Please configure the chat settings first.",
-              toastLength: Toast.LENGTH_LONG,
-              gravity: ToastGravity.TOP,
-              timeInSecForIosWeb: 1,
-              backgroundColor: Colors.red,
-              textColor: Colors.white,
-              fontSize: 16.0,
-            );
-            return;
-          }
+                if (_pref.chatName.isEmpty) {
+                  Fluttertoast.showToast(
+                    msg: "Please configure the chat settings first.",
+                    toastLength: Toast.LENGTH_LONG,
+                    gravity: ToastGravity.TOP,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    fontSize: 16.0,
+                  );
+                  setState(() {
+                    isFetching = false; // Restablece el estado de carga
+                  });
+                  return;
+                }
 
-          if (isConnected) {
-            _pref.isConnected = false;
-            service.invoke("stopService");
-            await flutterLocalNotificationsPlugin.cancel(888);
+                if (isConnected) {
+                  final service = FlutterBackgroundService();
+                  _pref.isConnected = false;
+                  service.invoke("stopService");
+                  await flutterLocalNotificationsPlugin.cancel(888);
 
-            setState(() {
-              isConnected = false;
-            });
-          } else {
-            _pref.isConnected = true;
-            setState(() {
-              isConnected = true;
-            });
+                  setState(() {
+                    isConnected = false;
+                    isFetching = false; // Restablece el estado de carga
+                  });
+                } else {
+                  // Verificar suscripción antes de conectar
+                  final tieneAcceso = await verificarSuscripcion();
+                  if (tieneAcceso) {
+                    final service = FlutterBackgroundService();
+                    _pref.isConnected = true;
 
-            await service.startService();
-          }
-        },
+                    setState(() {
+                      isConnected = true;
+                    });
+
+                    await service.startService();
+                  }
+
+                  setState(() {
+                    isFetching = false; // Restablece el estado de carga
+                  });
+                }
+              },
         child: Text(
-          isConnected && _pref.chatIdUser.isNotEmpty ? 'Disconnect' : "Connect",
+          isFetching
+              ? 'Connecting...' // Texto mientras se realiza la petición
+              : isConnected && _pref.chatIdUser.isNotEmpty
+                  ? 'Disconnect'
+                  : "Connect",
           style: TextStyle(
               color: Colors.white,
               fontFamily: 'Poppins',

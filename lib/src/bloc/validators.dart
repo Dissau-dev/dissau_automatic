@@ -39,7 +39,7 @@ mixin Validators {
   );
   final validatorChatId = StreamTransformer<String, String>.fromHandlers(
     handleData: (chatId, sink) {
-      final RegExp regex = RegExp(r'^-\d{9,12}$');
+      final RegExp regex = RegExp(r'^-\d{9,20}$');
       final _pref = new PreferenciasUsuario();
       if (chatId.isEmpty && _pref.chatIdUser.isEmpty) {
         sink.addError("Invalid chat id");

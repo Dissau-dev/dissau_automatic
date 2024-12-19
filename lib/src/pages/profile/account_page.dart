@@ -1,19 +1,30 @@
-import 'package:dissau_automatic/src/pages/profile/subscription_page.dart';
+import 'package:dissau_automatic/src/pages/auth/login_page.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
+import '../../../main.dart';
 import '../../preferencias_usuarios/preferencias_usuario.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final subscription = PreferenciasUsuario().subscription;
+
 class AccountPage extends StatelessWidget {
+  const AccountPage({super.key});
   _logOut(BuildContext context) async {
     final prefs = new PreferenciasUsuario();
     prefs.token = "";
 
-    Navigator.pushReplacementNamed(context, 'login');
+    // Navega al Login después de un pequeño retraso
+
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/login',
+      (route) => false, // Limpia la pila de navegación
+    );
   }
 
   _onPlan(BuildContext context) async {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => SubscriptionPage()));
+    Navigator.pushNamed(context, '/profile/subs');
   }
 
   @override
@@ -73,10 +84,10 @@ class AccountPage extends StatelessWidget {
 
                           // Lista
                           Container(
-                            height: 300, // Ajusta la altura según sea necesario
+                            height: 200, // Ajusta la altura según sea necesario
                             child: ListView(
                               children: [
-                                _SettingsTile(
+                                /*_SettingsTile(
                                   title: 'Cuenta',
                                   subtitle: 'example@gmail.com',
                                   onTap: () {},
@@ -88,10 +99,14 @@ class AccountPage extends StatelessWidget {
                                             fontFamily: 'Poppins'),
                                       ),
                                       onPressed: () => _logOut(context)),
-                                ),
+                                ),*/
                                 _SettingsTile(
-                                  title: '3 Months + free week',
-                                  subtitle: 'venc 11/12/2024',
+                                  title: subscription?.plan != null
+                                      ? '${subscription?.plan}'
+                                      : 'Get your plan',
+                                  subtitle: subscription?.plan != null
+                                      ? 'venc ${DateFormat('dd/MM/yyyy').format(subscription!.endDate)}'
+                                      : '6 Months, Yearly ...',
                                   trailing: const TextButton(
                                     onPressed: null,
                                     child: Text(

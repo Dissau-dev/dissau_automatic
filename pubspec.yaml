@@ -30,12 +30,29 @@ dependencies:
   flutter_background_service:
   flutter_local_notifications: ^17.2.4
   flutter_stripe: ^10.2.0
+  flutter_native_splash: ^2.4.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^4.0.0
+
+flutter_native_splash:
+  color: "#25253a"
+  image: assets/images/splash_logo.png
+  branding: assets/images/splash_logo.png
+  color_dark: "#25253a"
+  image_dark: assets/images/splash_logo.png
+  branding_dark: assets/images/splash_logo.png
+
+  android_12:
+    image: assets/images/splash_logo.png
+    icon_background_color: "#25253a"
+    image_dark: assets/images/splash_logo.png
+    icon_background_color_dark: "#25253a"
+
+  web: false
 
 flutter:
   uses-material-design: true
@@ -44,6 +61,7 @@ flutter:
     - assets/images/Baner.png
     - assets/images/icon_bot.png
     - assets/images/Bedge.png
+    - assets/images/splash_logo.png
 
   fonts:
     - family: Poppins
@@ -51,6 +69,3 @@ flutter:
         - asset: assets/fonts/Poppins-Light.ttf
         - asset: assets/fonts/Poppins-Bold.ttf
         - asset: assets/fonts/Poppins-Medium.ttf
-
-  # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/custom-fonts/#from-packages

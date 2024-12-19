@@ -4,19 +4,20 @@ import 'package:dissau_automatic/src/preferencias_usuarios/preferencias_usuario.
 import 'package:http/http.dart' as http;
 
 class UserProvider {
-  final String _firebaseToken = 'AIzaSyCiUKWya_5JHhSWF75aEDz6XfsgzYFp5To';
   final _prefs = new PreferenciasUsuario();
 
-  Future<Map<String, dynamic>> newUser(String email, String password) async {
+  Future<Map<String, dynamic>> registerUser(
+      String email, String password) async {
     final authData = {
       'email': email,
       'password': password,
-      'returnSecureToken': true
+      'name': "user Name",
+      "role": "USER_ROLE"
     };
 
     final resp = await http.post(
       Uri.parse(
-          'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=$_firebaseToken'), // Convertir a Uri
+          'https://jumb2bot-backend.onrender.com/user/register'), // Convertir a Uri
       body: json.encode(authData),
       headers: {
         'Content-Type':
@@ -25,11 +26,12 @@ class UserProvider {
     );
 
     Map<String, dynamic> decodedResp = json.decode(resp.body);
-
     print(decodedResp);
-    if (decodedResp.containsKey('idToken')) {
-      _prefs.token = decodedResp['idToken'];
-      return {'ok': true, 'token': decodedResp['idToken']};
+    final user = decodedResp['user'];
+    if (decodedResp.containsKey('token')) {
+      _prefs.token = decodedResp['token'];
+      _prefs.saveUser(user);
+      return {'ok': true, 'token': decodedResp['token'], 'user': user};
     } else {
       return {'ok': false, 'message': decodedResp['error']['message']};
     }
@@ -39,12 +41,11 @@ class UserProvider {
     final authData = {
       'email': email,
       'password': password,
-      'returnSecureToken': true
     };
 
     final resp = await http.post(
       Uri.parse(
-          'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$_firebaseToken'), // Convertir a Uri
+          'https://jumb2bot-backend.onrender.com/user/login'), // Convertir a Uri
       body: json.encode(authData),
       headers: {
         'Content-Type':
@@ -53,13 +54,50 @@ class UserProvider {
     );
 
     Map<String, dynamic> decodedResp = json.decode(resp.body);
-
     print(decodedResp);
-    if (decodedResp.containsKey('idToken')) {
-      _prefs.token = decodedResp['idToken'];
-      return {'ok': true, 'token': decodedResp['idToken']};
+    final user = decodedResp['user'];
+    if (decodedResp.containsKey('token')) {
+      _prefs.token = decodedResp['token'];
+      print("${user}");
+      await _prefs.saveUser(user);
+      return {'ok': true, 'token': decodedResp['token'], 'user': user};
     } else {
-      return {'ok': false, 'message': decodedResp['error']['message']};
+      final errorMessage =
+          decodedResp['message'] ?? 'An unknown error occurred';
+      return {'ok': false, 'message': errorMessage};
+    }
+  }
+
+  Future<Map<String, dynamic>> cancelUserSubscription(int userId) async {
+    final url = 'https://jumb2bot-backend.onrender.com/subscription/cancel';
+
+    try {
+      final response = await http.put(
+        Uri.parse(url),
+        body: json.encode({'userId': userId}),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      final decodedResp = json.decode(response.body);
+      print("_____ response desde el provider : $decodedResp['']");
+
+      if (response.statusCode == 200) {
+        return {
+          'ok': true,
+          'message': decodedResp['message'],
+          'subscription': decodedResp['subscription']
+        };
+      } else {
+        return {
+          'ok': false,
+          'message': decodedResp['error'] ?? 'An error occurred'
+        };
+      }
+    } catch (e) {
+      return {
+        'ok': false,
+        'message': 'Failed to connect to the server. Please try again.'
+      };
     }
   }
 }

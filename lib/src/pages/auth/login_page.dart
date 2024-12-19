@@ -1,6 +1,8 @@
 import 'package:dissau_automatic/providers/user_provider.dart';
 import 'package:dissau_automatic/src/bloc/login_bloc.dart';
 import 'package:dissau_automatic/src/bloc/provider.dart';
+import 'package:dissau_automatic/src/pages/auth/register_page.dart';
+import 'package:dissau_automatic/src/routes/app_navigation.dart';
 import 'package:dissau_automatic/src/utils/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -108,8 +110,9 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         TextButton(
-            onPressed: () =>
-                Navigator.pushReplacementNamed(context, 'register'),
+            onPressed: () => Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => RegisterPage()),
+                ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -272,7 +275,8 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     if (info['ok']) {
-      Navigator.pushReplacementNamed(context, 'home');
+      // Una vez logueado, navega al home (y elimina las rutas anteriores)
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
       showAlert(context, info["message"]);
     }

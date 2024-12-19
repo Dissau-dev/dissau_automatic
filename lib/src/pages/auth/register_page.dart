@@ -264,14 +264,14 @@ class _RegisterPageState extends State<RegisterPage> {
       isLoading = true;
     });
 
-    Map info = await userProvider.newUser(bloc.email, bloc.password);
+    Map info = await userProvider.registerUser(bloc.email, bloc.password);
 
     setState(() {
       isLoading = false;
     });
 
     if (info['ok']) {
-      Navigator.pushReplacementNamed(context, 'home');
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
       showAlert(context, info["message"]);
     }

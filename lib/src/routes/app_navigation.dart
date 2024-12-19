@@ -2,6 +2,7 @@ import 'package:dissau_automatic/src/pages/main/home_page.dart';
 import 'package:dissau_automatic/src/pages/products/products_page.dart';
 import 'package:dissau_automatic/src/pages/profile/profile_page.dart';
 import 'package:dissau_automatic/src/pages/main/settings_page.dart';
+import 'package:dissau_automatic/src/routes/profile_navigation.dart';
 import 'package:dissau_automatic/src/widgets/custom_bar_navigation.dart';
 
 import 'package:flutter/material.dart';
@@ -16,7 +17,7 @@ class _AppNavigationState extends State<AppNavigation> {
   final List<Widget> _screens = [
     const HomePage(),
     //   const ProductsPage(),
-    ProfilePage(),
+    const ProfileNavigation(),
   ];
 
   void _onTabTapped(int index) {

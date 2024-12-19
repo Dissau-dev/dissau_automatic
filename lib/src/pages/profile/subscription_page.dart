@@ -1,8 +1,132 @@
-import 'package:dissau_automatic/src/pages/profile/account_page.dart';
-import 'package:flutter/material.dart';
+import 'dart:ffi';
 
-class SubscriptionPage extends StatelessWidget {
+import 'package:dissau_automatic/providers/subscription_model.dart';
+import 'package:dissau_automatic/src/pages/profile/payment_page.dart';
+import 'package:dissau_automatic/src/preferencias_usuarios/preferencias_usuario.dart';
+import 'package:dissau_automatic/src/widgets/subscription._widget.dart';
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:intl/intl.dart';
+import '../../../providers/user_provider.dart';
+
+class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({super.key});
+
+  @override
+  State<SubscriptionPage> createState() => _SubscriptionPageState();
+}
+
+class _SubscriptionPageState extends State<SubscriptionPage> {
+  final _pref = new PreferenciasUsuario();
+  final subscription = PreferenciasUsuario().subscription;
+  final usuario = PreferenciasUsuario().user;
+  final UserProvider _userProvider = UserProvider();
+  bool cancelling = false; // Variable para manejar el estado de cancelación
+
+  void cancelSubscription(BuildContext context, int userId) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Cancel Subscription'),
+            content: const Text(
+              'Are you sure you want to cancel your active subscription?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  setState(() => cancelling = true);
+
+                  // Llamada al método de cancelación
+                  final response =
+                      await _userProvider.cancelUserSubscription(userId);
+
+                  setState(() => cancelling = false);
+                  Navigator.pop(context); // Cierra el diálogo
+
+                  if (response['ok']) {
+                    Fluttertoast.showToast(
+                      msg: response['message'],
+                      toastLength: Toast.LENGTH_LONG,
+                      gravity: ToastGravity.BOTTOM,
+                      backgroundColor: Colors.green,
+                      textColor: Colors.white,
+                    );
+                    if (response['subscription'] != null) {
+                      try {
+                        final newSubscription = SubscriptionModel.fromJson(
+                            response['subscription']);
+                        await _pref
+                            .updateSubscriptionInStorage(newSubscription);
+                      } catch (error) {
+                        print(error);
+                        print("fail subs update");
+                      }
+                    }
+                  } else {
+                    _showErrorDialog(context, response['message']);
+                  }
+                },
+                child: cancelling
+                    ? const CircularProgressIndicator() // Mostrar carga
+                    : const Text('Yes'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('No'),
+              ),
+            ],
+          );
+        });
+      },
+    );
+  }
+
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> fetchPlans() async {
+    final url = Uri.parse('https://jumb2bot-backend.onrender.com/plans/all');
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = json.decode(response.body);
+        return jsonData
+            .map((plan) => {
+                  'product_name': plan['product_name'],
+                  'product_id': plan['product_id'],
+                  'price_id': plan['price_id'],
+                  'price': plan['price'],
+                  'description': plan['description'],
+                })
+            .toList();
+      } else {
+        throw Exception('Failed to load plans: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch plans: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,181 +136,230 @@ class SubscriptionPage extends StatelessWidget {
           gradient: RadialGradient(
             center: Alignment.topCenter,
             radius: 0.6,
-            stops: [0.3, 1.0], // Controla la transición entre colores
+            stops: [0.3, 1.0],
             colors: [
-              Color(0xFF372781), // Color principal (centro)
-              Color(0xFF25253A), // Color de fondo (extremos)
+              Color(0xFF372781), // Color principal
+              Color(0xFF25253A), // Color de fondo
             ],
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // IconButton
-              Align(
-                alignment: Alignment.topLeft,
-                child: IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(Icons.close, color: Colors.white),
-                  padding: const EdgeInsets.only(top: 20.0, left: 16.0),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(Icons.close, color: Colors.white),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 40), // Separación
-              // Imagen centrada
-              Center(
-                child: Image.asset(
-                  'assets/images/Bedge.png', // Asegúrate de reemplazar con tu ruta de imagen
-                  width: 80,
-                  height: 80,
+                const SizedBox(height: 20),
+                const Text(
+                  'Your Subscription Details',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              const SizedBox(height: 20),
-              // Textos principales centrados
-              const Text(
-                'Título Principal',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Texto secundario',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 16,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const Spacer(), // Empuja los botones hacia la parte inferior
-              // Botones con diseño
-              Column(
-                children: List.generate(3, (index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF2E2D4D),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 4, // Sombra
-
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      ),
-                      onPressed: () {
-                        // Acción del botón
-                      },
-                      child: Container(
-                          padding: EdgeInsets.only(left: 10.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Título Botón ${index + 1}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Texto secundario',
-                                    style: TextStyle(
-                                      color: Colors.grey[500],
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const Row(
-                                children: [
-                                  Text(
-                                    '\$99.99',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Icon(
-                                    Icons.chevron_right,
-                                    color: Colors.white,
-                                    size: 24,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          )),
+                const SizedBox(height: 20),
+                if (subscription?.plan == null)
+                  Image.asset(
+                    'assets/images/Bedge.png',
+                    height: MediaQuery.of(context).size.height * 0.21,
+                    width: MediaQuery.of(context).size.width * 2.0,
+                  ),
+                if (subscription?.plan != null)
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF31314B),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  );
-                }),
-              ),
-              const SizedBox(height: 20),
-            ],
+                    padding:
+                        const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [Spacer(), SubscriptionWidget()],
+                        ),
+                        Text(
+                          'Plan: ${subscription?.plan}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                        Text(
+                          'Status: ${subscription?.status}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                        Text(
+                          'Expires on: ${subscription != null && subscription?.endDate != null ? DateFormat('dd/MM/yyyy').format(subscription!.endDate) : 'Unknown'}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Center(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  cancelling ? Colors.grey : Colors.red,
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 10.0, horizontal: 20.0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: cancelling
+                                ? null // Deshabilitar si estamos en proceso de cancelación
+                                : () {
+                                    cancelSubscription(context, usuario!.id);
+                                  },
+                            child: const Text(
+                              'Cancel suscription',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 30),
+                const Text(
+                  'Upgrade or Renew Your Plan',
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 197, 197, 221),
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: FutureBuilder<List<Map<String, dynamic>>>(
+                    future: fetchPlans(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                          ),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            'Failed to load plans: ${snapshot.error}',
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        );
+                      } else if (snapshot.hasData) {
+                        final plans = snapshot.data!;
+                        return ListView.builder(
+                          itemCount: plans.length,
+                          itemBuilder: (context, index) {
+                            final plan = plans[index];
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF31314B),
+                                  side: const BorderSide(
+                                      color: Colors.white, width: 0.15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  padding: const EdgeInsets.all(10.0),
+                                ),
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/profile/payment',
+                                    arguments: plan,
+                                  );
+                                },
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          plan['product_name'],
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          plan['description'],
+                                          style: const TextStyle(
+                                            color: Color.fromARGB(
+                                                255, 197, 197, 221),
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          plan['price'],
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 18.0,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        const Icon(
+                                          Icons.chevron_right,
+                                          color: Colors.white,
+                                          size: 36,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      } else {
+                        return const Center(
+                          child: Text('No plans available'),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
-  }
-}
-
-class _SettingsTile extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  const _SettingsTile({
-    Key? key,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        height: 88,
-        child: Column(
-          children: [
-            ListTile(
-              onTap: onTap,
-              contentPadding: EdgeInsets.symmetric(
-                  vertical: -4.0), // Ajusta el valor vertical
-              title: Text(
-                title,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600),
-              ),
-              subtitle: Text(
-                subtitle,
-                style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w100),
-              ),
-              trailing: const Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-          ],
-        ));
   }
 }
