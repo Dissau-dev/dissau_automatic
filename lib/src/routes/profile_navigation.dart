@@ -1,4 +1,5 @@
 import 'package:dissau_automatic/src/pages/profile/account_page.dart';
+import 'package:dissau_automatic/src/pages/profile/password_page.dart';
 import 'package:dissau_automatic/src/pages/profile/payment_page.dart';
 import 'package:dissau_automatic/src/pages/profile/profile_page.dart';
 import 'package:dissau_automatic/src/pages/profile/subscription_page.dart';
@@ -25,6 +26,9 @@ class ProfileNavigation extends StatelessWidget {
             break;
           case '/profile/subs':
             builder = (BuildContext _) => const SubscriptionPage();
+            break;
+          case '/profile/password':
+            builder = (BuildContext _) => const PasswordPage();
             break;
           case '/profile/payment':
             // Aquí pasamos los argumentos a la pantalla PaymentPage

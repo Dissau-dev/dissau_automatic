@@ -1,4 +1,4 @@
-plugins {
+plugins { 
     id "com.android.application"
     id "kotlin-android"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -49,6 +49,14 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.debug
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            // Cambia el nombre del APK generado
+            def newName = "DissauAutomatic.apk"
+            output.outputFileName = newName
         }
     }
 }

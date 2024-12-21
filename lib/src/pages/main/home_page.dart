@@ -343,15 +343,6 @@ class _SmsPageState extends State<HomePage> {
         }
       } else if (response.statusCode == 404) {
         await _pref.removeSubscriptionFromStorage();
-        Fluttertoast.showToast(
-          msg: "No se encontró la suscripción. Por favor, adquiera un plan.",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.TOP,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
 
         // Verificar periodo de prueba
         final userCreatedAt = DateTime.parse(usuario!.createdAt);
@@ -369,6 +360,15 @@ class _SmsPageState extends State<HomePage> {
           );
           return false;
         } else {
+          Fluttertoast.showToast(
+            msg: "Conectado con el tiempo de prueba",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.TOP,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.amber,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
           return true; // En periodo de prueba
         }
       } else {

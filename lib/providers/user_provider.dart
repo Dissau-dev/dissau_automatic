@@ -68,6 +68,35 @@ class UserProvider {
     }
   }
 
+  Future<Map<String, dynamic>> changePassword(
+     String password, userId) async {
+    final authData = {
+      'password': password,
+    };
+
+    final resp = await http.put(
+      Uri.parse(
+          'https://jumb2bot-backend.onrender.com/user/change-passwors/${userId}'), // Convertir a Uri
+      body: json.encode(authData),
+      headers: {
+        'Content-Type':
+            'application/json', // Asegúrate de establecer el tipo de contenido
+      },
+    );
+
+    Map<String, dynamic> decodedResp = json.decode(resp.body);
+    print(decodedResp);
+    
+    if (resp.statusCode == 200) {
+   
+      return {'ok': true, 'message': decodedResp['message']};
+    } else {
+      final errorMessage =
+          decodedResp['message'] ?? 'An unknown error occurred';
+      return {'ok': false, 'message': errorMessage};
+    }
+  }
+
   Future<Map<String, dynamic>> cancelUserSubscription(int userId) async {
     final url = 'https://jumb2bot-backend.onrender.com/subscription/cancel';
 

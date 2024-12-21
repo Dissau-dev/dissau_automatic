@@ -23,6 +23,13 @@ class AccountPage extends StatelessWidget {
     );
   }
 
+  _onPassword(BuildContext context) async {
+    final prefs = new PreferenciasUsuario();
+    prefs.token = "";
+
+    Navigator.pushNamed(context, '/profile/password');
+  }
+
   _onPlan(BuildContext context) async {
     Navigator.pushNamed(context, '/profile/subs');
   }
@@ -122,7 +129,7 @@ class AccountPage extends StatelessWidget {
                                 _SettingsTile(
                                   title: 'Cambiar Contraseña',
                                   subtitle: '',
-                                  onTap: () {},
+                                  onTap: () => _onPassword(context),
                                   trailing: const Icon(
                                     Icons.arrow_forward_ios,
                                     color: Colors.white,

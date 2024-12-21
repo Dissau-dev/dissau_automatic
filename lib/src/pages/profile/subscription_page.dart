@@ -163,13 +163,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   'Your Subscription Details',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 28,
+                    fontSize: 24,
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w500,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 if (subscription?.plan == null)
                   Image.asset(
                     'assets/images/Bedge.png',
@@ -184,7 +184,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     padding:
-                        const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                        const EdgeInsets.only(left: 16, right: 16, bottom: 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -213,7 +213,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                             fontSize: 18,
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 10),
                         Center(
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
